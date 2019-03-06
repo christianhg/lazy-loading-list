@@ -1,0 +1,38 @@
+html {
+  font-size: calc(0.85em + 1vw);
+}
+
+body {
+  background-color: #fff;
+  color: #222222;
+  line-height: 1.75;
+}
+
+#root {
+  padding: 2rem;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  background-color: rgb(240,240,240);
+  border: 1px solid rgb(200,200,200);
+  display: block;
+  list-style: none;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-bottom: 2rem;
+}
+
+.name {
+  display: block;
+}
+
+.visible {
+  background: red;
+}
