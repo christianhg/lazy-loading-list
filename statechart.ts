@@ -83,6 +83,8 @@ interface AdvancedLazyLoadMachineContext<T> {
 interface AdvancedLazyLoadMachineConfig<T> {
   id: number;
   fetchData: (id: number) => Promise<T>;
+  onDone: () => void;
+  onError: (error: string) => void;
 }
 
 type AdvancedLazyLoadEvent =
@@ -99,6 +101,8 @@ export type AdvancedLazyLoadMachine<T> = Interpreter<
 export function createAdvancedLazyLoadMachine<T>({
   id,
   fetchData,
+  onDone,
+  onError,
 }: AdvancedLazyLoadMachineConfig<T>): AdvancedLazyLoadMachine<T> {
   const machine = Machine<
     AdvancedLazyLoadMachineContext<T>,
@@ -134,11 +138,11 @@ export function createAdvancedLazyLoadMachine<T>({
             src: 'fetchData',
             onDone: {
               target: 'success',
-              actions: 'updateUser',
+              actions: 'notifyDone',
             },
             onError: {
               target: 'failure',
-              actions: 'updateError',
+              actions: 'notifyError',
             },
           },
         },
@@ -153,6 +157,12 @@ export function createAdvancedLazyLoadMachine<T>({
     {
       actions: {
         fetchData: ctx => fetchData(ctx.id),
+        notifyDone: onDone,
+        notifyError: ctx => {
+          if (ctx.error) {
+            onError(ctx.error);
+          }
+        },
       },
     },
   );
