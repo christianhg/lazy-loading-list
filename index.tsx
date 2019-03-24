@@ -1,54 +1,40 @@
+import 'modern-normalize';
 import * as React from 'react';
 import { render } from 'react-dom';
-import { Pokemon, pokemon } from './pokemon';
-
-import 'modern-normalize';
+import { InView } from 'react-intersection-observer';
+import { pokemon, Pokemon, enrichPokemon } from './pokemon';
 import './styles.css';
+import { createLazyLoadMachine } from './statechart';
 
-class PokemonListItem extends React.Component<
-  Pokemon,
-  {
-    id: string;
-    name: string;
-  }
-> {
-  myRef: React.RefObject<Element>;
+const PokemonListItem = (pokemon: Pokemon) => {
+  let img;
 
-  constructor(props: Pokemon) {
-    super(props);
+  const statechart = createLazyLoadMachine({
+    onLoading: () => {
+      enrichPokemon(pokemon.id).then(enrichedPokemon => {
+        console.log(enrichedPokemon.image);
+        img = enrichedPokemon.image;
+      });
+    },
+  });
 
-    this.state = {
-      id: props.id,
-      name: props.name,
-    };
-
-    this.myRef = React.createRef<Element>();
-  }
-
-  render() {
-    return (
-      <li>
-        <span className="name">{this.state.name}</span>
-      </li>
-    );
-  }
-
-  componentDidMount() {
-    const observer = new IntersectionObserver(
-      x => {
-        console.log(x);
-      },
-      {
-        threshold: 0.25,
-      },
-    );
-
-    console.log(this.myRef.current);
-    if (this.myRef.current) {
-      observer.observe(this.myRef.current);
-    }
-  }
-}
+  return (
+    <InView
+      as="li"
+      onChange={inView => {
+        if (inView) {
+          statechart.send('TURNED_VISIBLE');
+        } else {
+          statechart.send('TURNED_HIDDEN');
+        }
+      }}
+    >
+      <span className="name">{pokemon.name}</span>
+      {img}
+      {img && <img src={img} />}
+    </InView>
+  );
+};
 
 class PokemonList extends React.Component {
   render() {
